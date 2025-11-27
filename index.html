@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦃 Thanksgiving NFL Leaderboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #0d2415 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 3px solid #FF6B35;
+            border-radius: 15px;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 107, 53, 0.3); }
+            to { box-shadow: 0 0 40px rgba(255, 107, 53, 0.5); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #FFB627;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: #FF6B35;
+        }
+
+        .tab.active {
+            background: #FF6B35;
+            border-color: #FFB627;
+            color: white;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .leaderboard {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+            transform: translateX(5px);
+        }
+
+        .rank {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFB627;
+            text-align: center;
+        }
+
+        .rank.first { 
+            color: #FFD700;
+            font-size: 2.5rem;
+        }
+        .rank.second { 
+            color: #C0C0C0;
+            font-size: 2.2rem;
+        }
+        .rank.third { 
+            color: #CD7F32;
+            font-size: 2rem;
+        }
+
+        .name {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FF6B35;
+            text-align: right;
+        }
+
+        .progress-section {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B35, #FFB627);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .question-result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #FF6B35;
+            margin-bottom: 15px;
+        }
+
+        .question-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FFB627;
+            font-size: 1.1rem;
+        }
+
+        .points-value {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #FF6B35;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .actual-result {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .participant-picks {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .pick {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        .pick.correct {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+
+        .pick.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #f44336;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #FFB627;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-item {
+                grid-template-columns: 50px 1fr 80px;
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .rank {
+                font-size: 1.5rem;
+            }
+            .name {
+                font-size: 1.1rem;
+            }
+            .score {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦃 THANKSGIVING NFL LEADERBOARD 🏈</h1>
+            <p>Live Results • 20 Family Members • 88 Points Maximum</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('leaderboard')">🏆 Leaderboard</div>
+            <div class="tab" onclick="showTab('all-picks')">👥 All Picks</div>
+            <div class="tab" onclick="showTab('stats')">📊 Stats</div>
+        </div>
+
+        <div id="leaderboard" class="content active">
+            <div class="leaderboard" id="leaderboard-list"></div>
+        </div>
+
+        <div id="all-picks" class="content">
+            <div id="picks-display"></div>
+        </div>
+
+        <div id="stats" class="content">
+            <div class="stats-grid" id="stats-display"></div>
+        </div>
+    </div>
+
+    <script>
+        const PARTICIPANTS = {
+    "Aayla": {"1": "Lions", "2": "Passing TD", "3": "No", "4": "2-3", "5": "No", "6": "Chiefs", "7": "Tie", "8": "Yes", "9": "Yes", "10": "1-3 times", "11": "Bengals", "12": "No", "13": "Yes", "14": "Yes", "15": "No", "16": "Chiefs", "17": "11-14", "18": "Yes", "19": "No", "20": "40", "21": "Dusty", "22": "Jiana", "23": "50"},
+    "Amy": {"1": "Packers", "2": "Passing TD", "3": "Yes", "4": "0-1", "5": "No", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "Yes", "13": "Yes", "14": "Yes", "15": "Yes", "16": "Chiefs", "17": "10 or fewer", "18": "No", "19": "Yes", "20": "44", "21": "Donnie", "22": "Donnie", "23": "55"},
+    "Andy": {"1": "Packers", "2": "Field Goal or Safety", "3": "Yes", "4": "4+", "5": "No", "6": "Chiefs", "7": "Mahomes", "8": "No", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "No", "13": "Yes", "14": "Yes", "15": "No", "16": "Chiefs", "17": "11-14", "18": "No", "19": "Yes", "20": "48", "21": "Kohl", "22": "Doug", "23": "56"},
+    "Donnie": {"1": "Lions", "2": "Passing TD", "3": "Yes", "4": "2-3", "5": "No", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "Yes", "10": "4-6 times", "11": "Ravens", "12": "Yes", "13": "Yes", "14": "Yes", "15": "No", "16": "Lions", "17": "15-18", "18": "No", "19": "No", "20": "52", "21": "Donnie", "22": "Dusty", "23": "45"},
+    "Doug": {"1": "Lions", "2": "Passing TD", "3": "Yes", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "Yes", "10": "1-3 times", "11": "Ravens", "12": "Yes", "13": "No", "14": "Yes", "15": "No", "16": "Lions", "17": "11-14", "18": "No", "19": "Yes", "20": "50", "21": "Kohl", "22": "Dusty", "23": "50"},
+    "Dusty": {"1": "Lions", "2": "Rushing TD", "3": "Yes", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "Yes", "10": "4-6 times", "11": "Ravens", "12": "No", "13": "Yes", "14": "Yes", "15": "No", "16": "Lions", "17": "15-18", "18": "No", "19": "No", "20": "58", "21": "Toni", "22": "Ryan", "23": "55"},
+    "Gavin": {"1": "Lions", "2": "Rushing TD", "3": "Yes", "4": "2-3", "5": "Yes", "6": "Cowboys", "7": "Dak", "8": "No", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "Yes", "13": "No", "14": "Yes", "15": "Yes", "16": "Lions", "17": "11-14", "18": "Yes", "19": "No", "20": "51", "21": "Dusty", "22": "Donnie", "23": "24"},
+    "Jiana": {"1": "Lions", "2": "Rushing TD", "3": "No", "4": "2-3", "5": "Yes", "6": "Cowboys", "7": "Mahomes", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "Yes", "13": "No", "14": "Yes", "15": "No", "16": "Cowboys", "17": "11-14", "18": "No", "19": "Yes", "20": "67", "21": "Kohl", "22": "Aayla", "23": "34"},
+    "Kairi": {"1": "Lions", "2": "Field Goal or Safety", "3": "No", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Tie", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Bengals", "12": "No", "13": "Yes", "14": "No", "15": "Yes", "16": "Chiefs", "17": "15-18", "18": "Yes", "19": "Yes", "20": "60", "21": "Kohl", "22": "Aayla", "23": "47"},
+    "Kalen": {"1": "Lions", "2": "Field Goal or Safety", "3": "Yes", "4": "2-3", "5": "No", "6": "Chiefs", "7": "Dak", "8": "No", "9": "Yes", "10": "0 times", "11": "Ravens", "12": "Yes", "13": "Yes", "14": "Yes", "15": "No", "16": "Chiefs", "17": "11-14", "18": "No", "19": "Yes", "20": "45", "21": "Kalen", "22": "Kalen", "23": "50"},
+    "Kathy": {"1": "Packers", "2": "Passing TD", "3": "No", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "Yes", "10": "4-6 times", "11": "Ravens", "12": "No", "13": "Yes", "14": "Yes", "15": "No", "16": "Chiefs", "17": "11-14", "18": "No", "19": "Yes", "20": "45", "21": "Donnie", "22": "Kalen", "23": "35"},
+    "Kohl": {"1": "Lions", "2": "Field Goal or Safety", "3": "Yes", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Mahomes", "8": "No", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "No", "13": "No", "14": "No", "15": "No", "16": "Lions", "17": "11-14", "18": "No", "19": "Yes", "20": "37", "21": "Kohl", "22": "Kalen", "23": "37"},
+    "Lexi": {"1": "Lions", "2": "Rushing TD", "3": "Yes", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Bengals", "12": "No", "13": "Yes", "14": "Yes", "15": "Yes", "16": "Lions", "17": "11-14", "18": "No", "19": "Yes", "20": "35", "21": "Grandpa", "22": "Donnie", "23": "30"},
+    "Lisa": {"1": "Packers", "2": "Passing TD", "3": "Yes", "4": "0-1", "5": "No", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "Yes", "13": "Yes", "14": "Yes", "15": "Yes", "16": "Chiefs", "17": "11-14", "18": "No", "19": "Yes", "20": "27", "21": "Dusty", "22": "Kalen", "23": "9"},
+    "Lucca": {"1": "Packers", "2": "Field Goal or Safety", "3": "Yes", "4": "0-1", "5": "Yes", "6": "Chiefs", "7": "Tie", "8": "No", "9": "No", "10": "4-6 times", "11": "Ravens", "12": "Yes", "13": "Yes", "14": "Yes", "15": "No", "16": "Chiefs", "17": "15-18", "18": "No", "19": "Yes", "20": "58", "21": "Toni", "22": "Ryan", "23": "50"},
+    "Nika": {"1": "Packers", "2": "Rushing TD", "3": "Yes", "4": "2-3", "5": "Yes", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Ravens", "12": "Yes", "13": "No", "14": "No", "15": "Yes", "16": "Chiefs", "17": "11-14", "18": "No", "19": "No", "20": "50", "21": "Mom", "22": "Donnie", "23": "25"},
+    "Ryan": {"1": "Lions", "2": "Rushing TD", "3": "Yes", "4": "0-1", "5": "No", "6": "Chiefs", "7": "Dak", "8": "No", "9": "Yes", "10": "1-3 times", "11": "Ravens", "12": "No", "13": "Yes", "14": "No", "15": "No", "16": "Cowboys", "17": "11-14", "18": "No", "19": "No", "20": "38", "21": "Cole", "22": "Ryan", "23": "24"},
+    "Sidney": {"1": "Lions", "2": "Field Goal or Safety", "3": "No", "4": "2-3", "5": "No", "6": "Cowboys", "7": "Mahomes", "8": "Yes", "9": "No", "10": "1-3 times", "11": "Bengals", "12": "No", "13": "No", "14": "Yes", "15": "No", "16": "Lions", "17": "10 or fewer", "18": "Yes", "19": "Yes", "20": "30", "21": "Grandma/Sidney", "22": "Donnie", "23": "40"},
+    "Toni": {"1": "Packers", "2": "Passing TD", "3": "Yes", "4": "0-1", "5": "No", "6": "Chiefs", "7": "Mahomes", "8": "Yes", "9": "No", "10": "4-6 times", "11": "Ravens", "12": "Yes", "13": "No", "14": "No", "15": "No", "16": "Packers", "17": "11-14", "18": "No", "19": "No", "20": "24", "21": "Kohl", "22": "Doug", "23": "10"}
+};
+
+        const QUESTIONS = {
+            "1": {text: "Who wins Packers @ Lions?", points: 1},
+            "2": {text: "First scoring play?", points: 2},
+            "3": {text: "Will Jahmyr Gibbs score a TD?", points: 2},
+            "4": {text: "Total turnovers in Packers-Lions?", points: 3},
+            "5": {text: "Will there be a 50+ yard FG in Packers-Lions?", points: 5},
+            "6": {text: "Who wins Chiefs @ Cowboys?", points: 1},
+            "7": {text: "Who throws more TD passes (Mahomes/Dak)?", points: 2},
+            "8": {text: "Will Travis Kelce catch a TD?", points: 3},
+            "9": {text: "Will Dak throw for 300+ yards?", points: 4},
+            "10": {text: "How many times will Taylor Swift be shown?", points: 4},
+            "11": {text: "Who wins Bengals @ Ravens?", points: 1},
+            "12": {text: "Will Joe Burrow throw 2+ TDs?", points: 3},
+            "13": {text: "Will Derrick Henry rush for 100+ yards?", points: 2},
+            "14": {text: "Will Ja'Marr Chase have 100+ rec yards?", points: 3},
+            "15": {text: "Will there be an INT returned for TD?", points: 6},
+            "16": {text: "Highest-scoring team of the day?", points: 3},
+            "17": {text: "Total TDs across ALL games?", points: 5},
+            "18": {text: "Will ANY game go to overtime?", points: 8},
+            "19": {text: "Will there be a successful 2-point conversion?", points: 5},
+            "20": {text: "Exact combined score in Packers-Lions?", points: 10},
+            "21": {text: "First family member to fall asleep?", points: 5},
+            "22": {text: "Who will eat the most turkey?", points: 2},
+            "23": {text: "Total trips to get food?", points: 2}
+        };
+
+        // CURRENT RESULTS - Updated from admin panel
+        let actualResults = {
+            "1": "Packers",
+            "2": "Field Goal",
+            "3": "No",
+            "4": "0",
+            "5": "No",
+            "21": "Kalen"
+        };
+
+        let scores = {};
+
+        function showTab(tabName) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'all-picks') displayAllPicks();
+            if (tabName === 'stats') displayStats();
+        }
+
+        function calculateScores() {
+            scores = {};
+            Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                let score = 0;
+                Object.entries(picks).forEach(([qNum, pick]) => {
+                    const actual = actualResults[qNum];
+                    if (!actual) return;
+
+                    if (pick.toLowerCase() === actual.toLowerCase()) {
+                        score += QUESTIONS[qNum].points;
+                    }
+                });
+                scores[name] = score;
+            });
+            updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            if (Object.keys(scores).length === 0) {
+                list.innerHTML = '<div class="no-data">⏳ No scores yet - games start at 1:00 PM ET!<br><br>🏈 Packers @ Lions (1:00 PM)<br>🏈 Chiefs @ Cowboys (4:30 PM)<br>🏈 Bengals @ Ravens (8:20 PM)</div>';
+                return;
+            }
+
+            const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            
+            list.innerHTML = sorted.map(([name, score], index) => {
+                const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
+                const percentage = (score / 88) * 100;
+                const trophy = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                
+                return `
+                    <div class="leaderboard-item">
+                        <div class="rank ${rankClass}">${trophy} #${index + 1}</div>
+                        <div class="name">${name}</div>
+                        <div class="score">${score} pts</div>
+                        <div class="progress-section">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${percentage}%">
+                                    ${percentage.toFixed(0)}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayAllPicks() {
+            const display = document.getElementById('picks-display');
+            display.innerHTML = '';
+
+            Object.entries(QUESTIONS).forEach(([qNum, q]) => {
+                const div = document.createElement('div');
+                div.className = 'question-result';
+                
+                const actual = actualResults[qNum];
+                let picksHTML = '<div class="participant-picks">';
+                
+                Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                    const pick = picks[qNum];
+                    let className = 'pick';
+                    if (actual) {
+                        className += pick.toLowerCase() === actual.toLowerCase() ? ' correct' : ' incorrect';
+                    }
+                    picksHTML += `<div class="${className}"><strong>${name}:</strong> ${pick}</div>`;
+                });
+                picksHTML += '</div>';
+                
+                div.innerHTML = `
+                    <div class="question-header">
+                        Q${qNum}: ${q.text} <span class="points-value">${q.points} pts</span>
+                        ${actual ? `<div class="actual-result">✅ Actual: ${actual}</div>` : ''}
+                    </div>
+                    ${picksHTML}
+                `;
+                display.appendChild(div);
+            });
+        }
+
+        function displayStats() {
+            const display = document.getElementById('stats-display');
+            const totalParticipants = Object.keys(PARTICIPANTS).length;
+            const questionsAnswered = Object.keys(actualResults).length;
+            const avgScore = Object.values(scores).reduce((a, b) => a + b, 0) / totalParticipants || 0;
+            const highScore = Math.max(...Object.values(scores), 0);
+            
+            display.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalParticipants}</div>
+                    <div class="stat-label">Participants</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${questionsAnswered}/23</div>
+                    <div class="stat-label">Questions Answered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgScore.toFixed(1)}</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${highScore}</div>
+                    <div class="stat-label">High Score</div>
+                </div>
+            `;
+        }
+
+        window.onload = () => {
+            calculateScores();
+        };
+    </script>
+</body>
+</html>
