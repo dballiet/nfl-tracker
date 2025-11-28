@@ -101,21 +101,113 @@
             transition: all 0.3s;
         }
 
-        .leaderboard-item:hover {
-            background: rgba(255, 107, 53, 0.1);
-            transform: translateX(5px);
+        .leaderboard-item.champion {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 165, 0, 0.3));
+            border: 4px solid #FFD700;
+            animation: champion-glow 2s ease-in-out infinite;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+            position: relative;
+            overflow: hidden;
         }
 
-        .leaderboard-item.doug-winner {
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
-            border: 3px solid #FFD700;
-            animation: winner-pulse 2s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        .leaderboard-item.champion::before {
+            content: '👑';
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0.1;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-15deg);
         }
 
-        @keyframes winner-pulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+        @keyframes champion-glow {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+                transform: scale(1.02);
+            }
+        }
+
+        .winner-banner {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.5);
+            animation: banner-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes banner-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .winner-banner h2 {
+            font-size: 2.5rem;
+            color: #1a472a;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .winner-banner .winner-name {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #8B0000;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin: 10px 0;
+        }
+
+        .family-awards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .award-card {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 182, 39, 0.2));
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #FF6B35;
+            text-align: center;
+        }
+
+        .award-emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .award-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #FFB627;
+            margin-bottom: 5px;
+        }
+
+        .award-winner {
+            font-size: 1.5rem;
+            color: #FF6B35;
+            font-weight: bold;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            position: absolute;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         .rank {
@@ -127,8 +219,7 @@
 
         .rank.first { 
             color: #FFD700;
-            font-size: 3rem;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            font-size: 2.5rem;
         }
         .rank.second { 
             color: #C0C0C0;
@@ -173,10 +264,6 @@
             padding-right: 10px;
             font-size: 0.85rem;
             font-weight: bold;
-        }
-
-        .progress-fill.perfect {
-            background: linear-gradient(90deg, #FFD700, #FFA500);
         }
 
         .question-result {
@@ -290,8 +377,9 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🦃 THANKSGIVING NFL LEADERBOARD 🏈</h1>
-            <p>Live Results • 20 Family Members • 88 Points Maximum</p>
+            <h1>🦃 THANKSGIVING NFL FINAL RESULTS 🏈</h1>
+            <p>All Games Complete! • 20 Family Members • 88 Points Maximum</p>
+            <p style="margin-top: 10px; font-size: 1.1rem;">Happy Thanksgiving 2025! 🍂</p>
         </div>
 
         <div class="tabs">
@@ -363,7 +451,7 @@
             "23": {text: "Total trips to get food?", points: 2}
         };
 
-        // CURRENT RESULTS
+        // FINAL RESULTS - All Games Complete! 🏈
         let actualResults = {
             "1": "Packers",
             "2": "Field Goal or Safety",
@@ -375,7 +463,16 @@
             "8": "Yes",
             "9": "Yes",
             "10": "0",
+            "11": "Bengals",
+            "12": "Yes",
+            "13": "No",
+            "14": "Yes",
+            "15": "No",
+            "16": "Bengals",
+            "17": "15-18",
+            "18": "No",
             "19": "Yes",
+            "20": "55",
             "21": "Kalen",
             "22": "Kalen",
             "23": "54"
@@ -402,6 +499,7 @@
                 const actualQ23 = parseInt(actualResults["23"]);
                 let minDifference = Infinity;
                 
+                // Find the minimum difference
                 Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
                     const guess = parseInt(picks["23"]);
                     const difference = Math.abs(guess - actualQ23);
@@ -410,6 +508,7 @@
                     }
                 });
                 
+                // Find all people with that minimum difference
                 Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
                     const guess = parseInt(picks["23"]);
                     const difference = Math.abs(guess - actualQ23);
@@ -419,32 +518,25 @@
                 });
             }
             
-            // Calculate scores - DOUG GETS ALL CURRENT QUESTIONS CORRECT!
+            // Calculate scores
             Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
                 let score = 0;
-                
-                if (name === "Doug") {
-                    // Doug gets ALL currently answered questions correct!
-                    Object.keys(actualResults).forEach(qNum => {
-                        score += QUESTIONS[qNum].points;
-                    });
-                } else {
-                    // Everyone else gets real scoring
-                    Object.entries(picks).forEach(([qNum, pick]) => {
-                        const actual = actualResults[qNum];
-                        if (!actual) return;
+                Object.entries(picks).forEach(([qNum, pick]) => {
+                    const actual = actualResults[qNum];
+                    if (!actual) return;
 
-                        if (qNum === "23") {
-                            if (q23Winners.includes(name)) {
-                                score += QUESTIONS[qNum].points;
-                            }
-                        } else {
-                            if (pick.toLowerCase() === actual.toLowerCase()) {
-                                score += QUESTIONS[qNum].points;
-                            }
+                    // Special handling for Q23 - award points if in winners list
+                    if (qNum === "23") {
+                        if (q23Winners.includes(name)) {
+                            score += QUESTIONS[qNum].points;
                         }
-                    });
-                }
+                    } else {
+                        // Normal exact match for all other questions
+                        if (pick.toLowerCase() === actual.toLowerCase()) {
+                            score += QUESTIONS[qNum].points;
+                        }
+                    }
+                });
                 scores[name] = score;
             });
             updateLeaderboard();
@@ -453,26 +545,68 @@
         function updateLeaderboard() {
             const list = document.getElementById('leaderboard-list');
             if (Object.keys(scores).length === 0) {
-                list.innerHTML = '<div class="no-data">⏳ No scores yet</div>';
+                list.innerHTML = '<div class="no-data">⏳ No scores yet - games start at 1:00 PM ET!<br><br>🏈 Packers @ Lions (1:00 PM)<br>🏈 Chiefs @ Cowboys (4:30 PM)<br>🏈 Bengals @ Ravens (8:20 PM)</div>';
                 return;
             }
 
             const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const winner = sorted[0];
+            const [winnerName, winnerScore] = winner;
             
-            list.innerHTML = sorted.map(([name, score], index) => {
+            // Add winner banner at the top
+            let html = `
+                <div class="winner-banner">
+                    <h2>🎉 THANKSGIVING NFL CHAMPION 2025 🎉</h2>
+                    <div class="winner-name">👑 ${winnerName} 👑</div>
+                    <p style="font-size: 2rem; color: #1a472a; font-weight: bold;">${winnerScore} Points!</p>
+                    <p style="font-size: 1.2rem; color: #0d2415; margin-top: 10px;">
+                        Predicted ${winnerScore} out of 88 possible points correctly!
+                    </p>
+                </div>
+            `;
+
+            // Add family awards section
+            const awards = calculateFamilyAwards(sorted);
+            html += `
+                <div class="family-awards">
+                    <div class="award-card">
+                        <div class="award-emoji">🦃</div>
+                        <div class="award-title">Turkey Champion</div>
+                        <div class="award-winner">${awards.turkeyChamp}</div>
+                    </div>
+                    <div class="award-card">
+                        <div class="award-emoji">😴</div>
+                        <div class="award-title">First Nap</div>
+                        <div class="award-winner">${actualResults["21"]}</div>
+                    </div>
+                    <div class="award-card">
+                        <div class="award-emoji">🍽️</div>
+                        <div class="award-title">Most Dedicated Eater</div>
+                        <div class="award-winner">${actualResults["23"]} trips!</div>
+                    </div>
+                    <div class="award-card">
+                        <div class="award-emoji">😬</div>
+                        <div class="award-title">Worst Prediction</div>
+                        <div class="award-winner">${sorted[sorted.length - 1][0]}</div>
+                        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">${sorted[sorted.length - 1][1]} pts</div>
+                    </div>
+                </div>
+            `;
+            
+            html += sorted.map(([name, score], index) => {
                 const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
                 const percentage = (score / 88) * 100;
                 const trophy = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-                const isDougWinner = name === "Doug" && index === 0;
+                const isChampion = index === 0;
                 
                 return `
-                    <div class="leaderboard-item ${isDougWinner ? 'doug-winner' : ''}">
+                    <div class="leaderboard-item ${isChampion ? 'champion' : ''}">
                         <div class="rank ${rankClass}">${trophy} #${index + 1}</div>
-                        <div class="name">${name}${isDougWinner ? ' 🎯🔥' : ''}</div>
+                        <div class="name">${name}${isChampion ? ' 🏆' : ''}</div>
                         <div class="score">${score} pts</div>
                         <div class="progress-section">
                             <div class="progress-bar">
-                                <div class="progress-fill ${isDougWinner ? 'perfect' : ''}" style="width: ${percentage}%">
+                                <div class="progress-fill" style="width: ${percentage}%">
                                     ${percentage.toFixed(0)}%
                                 </div>
                             </div>
@@ -480,12 +614,23 @@
                     </div>
                 `;
             }).join('');
+
+            list.innerHTML = html;
+        }
+
+        function calculateFamilyAwards(sorted) {
+            return {
+                turkeyChamp: actualResults["22"] || "TBD",
+                napChamp: actualResults["21"] || "TBD",
+                mostTrips: actualResults["23"] || "TBD"
+            };
         }
 
         function displayAllPicks() {
             const display = document.getElementById('picks-display');
             display.innerHTML = '';
 
+            // Pre-calculate Q23 winners if there's an answer
             let q23Winners = [];
             if (actualResults["23"]) {
                 const actualQ23 = parseInt(actualResults["23"]);
@@ -520,12 +665,11 @@
                     let className = 'pick';
                     if (actual) {
                         let isCorrect;
-                        if (name === "Doug") {
-                            // Doug is ALWAYS correct!
-                            isCorrect = true;
-                        } else if (qNum === "23") {
+                        if (qNum === "23") {
+                            // For Q23, correct if in winners list
                             isCorrect = q23Winners.includes(name);
                         } else {
+                            // Normal exact match for other questions
                             isCorrect = pick.toLowerCase() === actual.toLowerCase();
                         }
                         className += isCorrect ? ' correct' : ' incorrect';
@@ -567,7 +711,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${highScore}</div>
-                    <div class="stat-label">High Score (PERFECT!)</div>
+                    <div class="stat-label">High Score</div>
                 </div>
             `;
         }
