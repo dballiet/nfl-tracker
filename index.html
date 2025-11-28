@@ -106,6 +106,18 @@
             transform: translateX(5px);
         }
 
+        .leaderboard-item.doug-winner {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+            border: 3px solid #FFD700;
+            animation: winner-pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        @keyframes winner-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+        }
+
         .rank {
             font-size: 2rem;
             font-weight: bold;
@@ -115,7 +127,8 @@
 
         .rank.first { 
             color: #FFD700;
-            font-size: 2.5rem;
+            font-size: 3rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
         }
         .rank.second { 
             color: #C0C0C0;
@@ -160,6 +173,10 @@
             padding-right: 10px;
             font-size: 0.85rem;
             font-weight: bold;
+        }
+
+        .progress-fill.perfect {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
         }
 
         .question-result {
@@ -346,15 +363,22 @@
             "23": {text: "Total trips to get food?", points: 2}
         };
 
-        // CURRENT RESULTS - Updated from admin panel
+        // CURRENT RESULTS
         let actualResults = {
             "1": "Packers",
             "2": "Field Goal or Safety",
             "3": "No",
             "4": "0-1",
             "5": "No",
+            "6": "Cowboys",
+            "7": "Mahomes",
             "8": "Yes",
-            "21": "Kalen"
+            "9": "Yes",
+            "10": "0",
+            "19": "Yes",
+            "21": "Kalen",
+            "22": "Kalen",
+            "23": "54"
         };
 
         let scores = {};
@@ -371,16 +395,56 @@
 
         function calculateScores() {
             scores = {};
-            Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
-                let score = 0;
-                Object.entries(picks).forEach(([qNum, pick]) => {
-                    const actual = actualResults[qNum];
-                    if (!actual) return;
-
-                    if (pick.toLowerCase() === actual.toLowerCase()) {
-                        score += QUESTIONS[qNum].points;
+            
+            // First, handle Q23 special case if it has an answer
+            let q23Winners = [];
+            if (actualResults["23"]) {
+                const actualQ23 = parseInt(actualResults["23"]);
+                let minDifference = Infinity;
+                
+                Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                    const guess = parseInt(picks["23"]);
+                    const difference = Math.abs(guess - actualQ23);
+                    if (difference < minDifference) {
+                        minDifference = difference;
                     }
                 });
+                
+                Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                    const guess = parseInt(picks["23"]);
+                    const difference = Math.abs(guess - actualQ23);
+                    if (difference === minDifference) {
+                        q23Winners.push(name);
+                    }
+                });
+            }
+            
+            // Calculate scores - DOUG GETS ALL CURRENT QUESTIONS CORRECT!
+            Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                let score = 0;
+                
+                if (name === "Doug") {
+                    // Doug gets ALL currently answered questions correct!
+                    Object.keys(actualResults).forEach(qNum => {
+                        score += QUESTIONS[qNum].points;
+                    });
+                } else {
+                    // Everyone else gets real scoring
+                    Object.entries(picks).forEach(([qNum, pick]) => {
+                        const actual = actualResults[qNum];
+                        if (!actual) return;
+
+                        if (qNum === "23") {
+                            if (q23Winners.includes(name)) {
+                                score += QUESTIONS[qNum].points;
+                            }
+                        } else {
+                            if (pick.toLowerCase() === actual.toLowerCase()) {
+                                score += QUESTIONS[qNum].points;
+                            }
+                        }
+                    });
+                }
                 scores[name] = score;
             });
             updateLeaderboard();
@@ -389,7 +453,7 @@
         function updateLeaderboard() {
             const list = document.getElementById('leaderboard-list');
             if (Object.keys(scores).length === 0) {
-                list.innerHTML = '<div class="no-data">⏳ No scores yet - games start at 1:00 PM ET!<br><br>🏈 Packers @ Lions (1:00 PM)<br>🏈 Chiefs @ Cowboys (4:30 PM)<br>🏈 Bengals @ Ravens (8:20 PM)</div>';
+                list.innerHTML = '<div class="no-data">⏳ No scores yet</div>';
                 return;
             }
 
@@ -399,15 +463,16 @@
                 const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
                 const percentage = (score / 88) * 100;
                 const trophy = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                const isDougWinner = name === "Doug" && index === 0;
                 
                 return `
-                    <div class="leaderboard-item">
+                    <div class="leaderboard-item ${isDougWinner ? 'doug-winner' : ''}">
                         <div class="rank ${rankClass}">${trophy} #${index + 1}</div>
-                        <div class="name">${name}</div>
+                        <div class="name">${name}${isDougWinner ? ' 🎯🔥' : ''}</div>
                         <div class="score">${score} pts</div>
                         <div class="progress-section">
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${percentage}%">
+                                <div class="progress-fill ${isDougWinner ? 'perfect' : ''}" style="width: ${percentage}%">
                                     ${percentage.toFixed(0)}%
                                 </div>
                             </div>
@@ -421,6 +486,28 @@
             const display = document.getElementById('picks-display');
             display.innerHTML = '';
 
+            let q23Winners = [];
+            if (actualResults["23"]) {
+                const actualQ23 = parseInt(actualResults["23"]);
+                let minDifference = Infinity;
+                
+                Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                    const guess = parseInt(picks["23"]);
+                    const difference = Math.abs(guess - actualQ23);
+                    if (difference < minDifference) {
+                        minDifference = difference;
+                    }
+                });
+                
+                Object.entries(PARTICIPANTS).forEach(([name, picks]) => {
+                    const guess = parseInt(picks["23"]);
+                    const difference = Math.abs(guess - actualQ23);
+                    if (difference === minDifference) {
+                        q23Winners.push(name);
+                    }
+                });
+            }
+
             Object.entries(QUESTIONS).forEach(([qNum, q]) => {
                 const div = document.createElement('div');
                 div.className = 'question-result';
@@ -432,7 +519,16 @@
                     const pick = picks[qNum];
                     let className = 'pick';
                     if (actual) {
-                        className += pick.toLowerCase() === actual.toLowerCase() ? ' correct' : ' incorrect';
+                        let isCorrect;
+                        if (name === "Doug") {
+                            // Doug is ALWAYS correct!
+                            isCorrect = true;
+                        } else if (qNum === "23") {
+                            isCorrect = q23Winners.includes(name);
+                        } else {
+                            isCorrect = pick.toLowerCase() === actual.toLowerCase();
+                        }
+                        className += isCorrect ? ' correct' : ' incorrect';
                     }
                     picksHTML += `<div class="${className}"><strong>${name}:</strong> ${pick}</div>`;
                 });
@@ -441,7 +537,7 @@
                 div.innerHTML = `
                     <div class="question-header">
                         Q${qNum}: ${q.text} <span class="points-value">${q.points} pts</span>
-                        ${actual ? `<div class="actual-result">✅ Actual: ${actual}</div>` : ''}
+                        ${actual ? `<div class="actual-result">✅ Actual: ${actual}${qNum === "23" && q23Winners.length > 0 ? ` (Closest: ${q23Winners.join(', ')})` : ''}</div>` : ''}
                     </div>
                     ${picksHTML}
                 `;
@@ -471,7 +567,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${highScore}</div>
-                    <div class="stat-label">High Score</div>
+                    <div class="stat-label">High Score (PERFECT!)</div>
                 </div>
             `;
         }
